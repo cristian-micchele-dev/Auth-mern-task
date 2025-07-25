@@ -24,5 +24,4 @@ build/
 .vscode/
 .idea/
 
-# Archivos del sistema operativo
 .DS_Store
