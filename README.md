@@ -49,7 +49,7 @@ Sigue estos pasos para configurar y ejecutar el proyecto en tu entorno local.
 ### 1. Clonar el Repositorio
 
 ```bash
-git clone https://github.com/tu-usuario/MERN-CRUD-AUTH.git
+git clone https://github.com/cristian-micchele-dev/Auth-mern-task
 cd MERN-CRUD-AUTH
 ```
 
