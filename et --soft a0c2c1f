@@ -1,0 +1,14 @@
+[33m916dde7[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m Fix: Cambiar a Authorization header en lugar de cookies
+[33ma75e141[m Fix: Configurar cookies para producción y agregar fallback con localStorage
+[33mae4a42e[m Fix: Corregir verificación de token usando authRequired middleware
+[33m213a4d9[m Fix: Mejorar configuración de axios y manejo de errores
+[33m21d377f[m Fix: Unificar configuración de cookies para producción
+[33m22fbd38[m Fix: Configurar cookies para producción y mejorar autenticación
+[33ma0c2c1f[m Fix: Mejorar configuración de CORS y autenticación para producción
+[33m9cf3ac0[m Resolve merge conflict and update backend URL
+[33mc7f0ded[m Resolve merge conflict in src/index.js
+[33m512ef96[m configurando para produccion
+[33m965ca2d[m configurando para subir a render
+[33m2a81b82[m configurando para deploy
+[33m422cc57[m configuramos el readme
+[33m5f80644[m terminando el proyecto

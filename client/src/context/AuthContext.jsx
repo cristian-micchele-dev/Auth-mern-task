@@ -1,10 +1,6 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import { registerRequest, loginRequest, verifyTokenRequest } from "../api/auth";
-import Cookies from "js-cookie";
 import { logoutRequest } from "../api/auth";
-
-
-
 
 export const AuthContext = createContext();
 
@@ -24,6 +20,12 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await registerRequest(user);
       console.log(res);
+      
+      // Guardar token en localStorage
+      if (res.data.token) {
+        localStorage.setItem('token', res.data.token);
+      }
+      
       setUser(res.data);
       setIsAuthenticated(true);
     } catch (error) {
@@ -32,63 +34,86 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-
   const signin = async (user) => {
     try {
       const res = await loginRequest(user);
-      console.log(res);
+      console.log('Login response:', res);
+      
+      // Guardar token en localStorage
+      if (res.data.token) {
+        localStorage.setItem('token', res.data.token);
+      }
+      
       setUser(res.data);
       setIsAuthenticated(true);
     } catch (error) {
-      if(Array .isArray(error.response.data)){
-        return setError(error.response.data);
-      }
-      setError([error.response.data.message]);
-     
-    }
-
-  }; 
-const logout = async () => {
-  try {
-    await logoutRequest(); // ✅ llama al backend para borrar la cookie
-    setUser(null);
-    setIsAuthenticated(false);
-  } catch (error) {
-    console.error("Logout failed:", error);
-  }
-};
-
-useEffect(() => {
-  if (errors.length > 0) {
-    const timer = setTimeout(() => {
-      setError([]);
-    }, 5000);
-    return () => clearTimeout(timer);
-  }
-}, [errors]);
-
-useEffect(() => {
-  const checkLogin = async () => {
-    try {
-      const res = await verifyTokenRequest();
-      console.log("Respuesta de verifyTokenRequest:", res);
-      if (!res.data) {
-        setIsAuthenticated(false);
-        setUser(null);
+      console.log('Login error:', error);
+      if (error.response?.data) {
+          if (Array.isArray(error.response.data)) {
+              return setError(error.response.data);
+          }
+          const errorMessage = error.response.data.error || error.response.data.message || 'Error de login';
+          setError([errorMessage]);
       } else {
-        setIsAuthenticated(true);
-        setUser(res.data);
+          setError(['Error de conexión']);
       }
-    } catch (error) {
-      console.log("Error en verifyTokenRequest:", error.response?.data || error.message);
-      setIsAuthenticated(false);
+    }
+  }; 
+
+  const logout = async () => {
+    try {
+      await logoutRequest();
+      localStorage.removeItem('token'); // Limpiar localStorage
       setUser(null);
-    } finally {
-      setLoading(false);
+      setIsAuthenticated(false);
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Limpiar localStorage aunque falle la petición
+      localStorage.removeItem('token');
+      setUser(null);
+      setIsAuthenticated(false);
     }
   };
-  checkLogin();
-}, []);
+
+  useEffect(() => {
+    if (errors.length > 0) {
+      const timer = setTimeout(() => {
+        setError([]);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [errors]);
+
+  useEffect(() => {
+    const checkLogin = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      
+      try {
+        const res = await verifyTokenRequest();
+        console.log("Respuesta de verifyTokenRequest:", res);
+        if (!res.data) {
+          setIsAuthenticated(false);
+          setUser(null);
+          localStorage.removeItem('token');
+        } else {
+          setIsAuthenticated(true);
+          setUser(res.data);
+        }
+      } catch (error) {
+        console.log("Error en verifyTokenRequest:", error);
+        setIsAuthenticated(false);
+        setUser(null);
+        localStorage.removeItem('token');
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkLogin();
+  }, []);
 
   return (
     <AuthContext.Provider value={{ singup, user, isAuthenticated, errors, signin, loading, logout }}>

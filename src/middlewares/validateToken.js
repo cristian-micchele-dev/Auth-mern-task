@@ -1,22 +1,36 @@
 
 import jwt from 'jsonwebtoken';
 export const authRequired = (req, res, next) => {
-    // Primero intentar obtener el token de las cookies
-    let token = req.cookies.token;
+    let token = null;
     
-    // Si no hay token en cookies, intentar obtenerlo del header Authorization
-    if (!token) {
-        const authHeader = req.headers.authorization;
-        if (authHeader && authHeader.startsWith('Bearer ')) {
-            token = authHeader.substring(7);
-        }
+    // Primero intentar obtener el token del header Authorization
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
     }
     
-    if(!token) return res.status(401).json({error: 'Unauthorized'});
+    // Si no hay token en header, intentar obtenerlo de las cookies
+    if (!token) {
+        token = req.cookies.token;
+    }
+    
+    console.log('🔍 Auth Debug:');
+    console.log('- Authorization header:', authHeader ? 'Present' : 'Not present');
+    console.log('- Token found:', token ? 'YES' : 'NO');
+    console.log('- Cookies received:', Object.keys(req.cookies));
+    
+    if(!token) {
+        console.log('❌ No token provided');
+        return res.status(401).json({error: 'Unauthorized'});
+    }
 
     // verificamos el token
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-        if(err) return res.status(403).json({message: "invalid token"});
+        if(err) {
+            console.log('❌ Token verification error:', err.message);
+            return res.status(403).json({message: "invalid token"});
+        }
+        console.log('✅ Token verified for user:', user._id);
         req.user = user;
         next();
     })
