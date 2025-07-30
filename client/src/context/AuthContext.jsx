@@ -46,16 +46,23 @@ export const AuthProvider = ({ children }) => {
       
       setUser(res.data);
       setIsAuthenticated(true);
+      setError([]); // Limpiar errores en login exitoso
     } catch (error) {
       console.log('Login error:', error);
+      
+      // Mejorar el manejo de errores
       if (error.response?.data) {
-          if (Array.isArray(error.response.data)) {
-              return setError(error.response.data);
-          }
-          const errorMessage = error.response.data.error || error.response.data.message || 'Error de login';
-          setError([errorMessage]);
+        if (Array.isArray(error.response.data)) {
+          setError(error.response.data);
+        } else if (error.response.data.error) {
+          setError([error.response.data.error]);
+        } else if (error.response.data.message) {
+          setError([error.response.data.message]);
+        } else {
+          setError(['Error de autenticación']);
+        }
       } else {
-          setError(['Error de conexión']);
+        setError(['Error de conexión con el servidor']);
       }
     }
   }; 
